@@ -1,0 +1,53 @@
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useMsal, useIsAuthenticated } from '@azure/msal-react';
+import Navbar from './components/Navbar';
+import Planning from './pages/Planning';
+import Memos from './pages/Memos';
+import Login from './pages/Login';
+import { useAuth } from './context/AuthContext';
+import { loginRequest } from './auth/msalConfig';
+
+function AuthSync() {
+  const { instance, accounts } = useMsal();
+  const isMsalAuthenticated = useIsAuthenticated();
+  const { token, login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function syncBackend() {
+      if (isMsalAuthenticated && accounts.length > 0 && !token) {
+        const response = await instance.acquireTokenSilent({ ...loginRequest, account: accounts[0] });
+        const res = await fetch('http://localhost:3000/api/auth/microsoft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken: response.idToken }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          login(data.token, data.user);
+          navigate('/');
+        }
+      }
+    }
+    syncBackend();
+  }, [isMsalAuthenticated, accounts, token]);
+
+  return null;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthSync />
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Planning />} />
+        <Route path="/memos" element={<Memos />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
