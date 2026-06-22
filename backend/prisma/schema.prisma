@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  microsoftId String     @unique
+  name        String
+  role        String     @default("MEMBER")
+  createdAt   DateTime   @default(now())
+  activities  Activity[]
+  memos       Memo[]
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  location    String?
+  category    String?
+  imageUrl    String?
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime @default(now())
+}
+
+model Memo {
+  id          String   @id @default(cuid())
+  title       String
+  meetingDate DateTime
+  content     String
+  visibility  String   @default("ADMIN_ONLY")
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime @default(now())
+}
