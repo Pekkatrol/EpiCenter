@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch } from '../api/client';
 
 function toDatetimeLocal(isoString) {
   const date = new Date(isoString);
@@ -16,7 +17,7 @@ function Memos() {
   const { user, token } = useAuth();
 
   const fetchMemos = () => {
-    fetch('http://localhost:3000/api/memos', {
+    apiFetch('/api/memos', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => res.json())
@@ -59,13 +60,13 @@ function Memos() {
     const payload = { ...form, meetingDate: new Date(form.meetingDate).toISOString() };
 
     if (editingId) {
-      await fetch(`http://localhost:3000/api/memos/${editingId}`, {
+      await apiFetch(`/api/memos/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
     } else {
-      await fetch('http://localhost:3000/api/memos', {
+      await apiFetch('/api/memos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...payload, createdById: user.id }),
@@ -78,7 +79,7 @@ function Memos() {
 
   const handleDelete = async (id) => {
     if (!confirm('Supprimer ce mémo ?')) return;
-    await fetch(`http://localhost:3000/api/memos/${id}`, {
+    await apiFetch(`/api/memos/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

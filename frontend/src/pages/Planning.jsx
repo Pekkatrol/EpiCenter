@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiFetch } from '../api/client';
 
 function toDatetimeLocal(isoString) {
   const date = new Date(isoString);
@@ -16,7 +17,7 @@ function Planning() {
   const { user, token } = useAuth();
 
   const fetchActivities = () => {
-    fetch('http://localhost:3000/api/activities')
+    apiFetch('/api/activities')
       .then((res) => res.json())
       .then((data) => {
         setActivities(data);
@@ -62,13 +63,13 @@ function Planning() {
     };
 
     if (editingId) {
-      await fetch(`http://localhost:3000/api/activities/${editingId}`, {
+      await apiFetch(`/api/activities/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
     } else {
-      await fetch('http://localhost:3000/api/activities', {
+      await apiFetch('/api/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...payload, createdById: user.id }),
@@ -81,7 +82,7 @@ function Planning() {
 
   const handleDelete = async (id) => {
     if (!confirm('Supprimer cette activité ?')) return;
-    await fetch(`http://localhost:3000/api/activities/${id}`, {
+    await apiFetch(`/api/activities/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

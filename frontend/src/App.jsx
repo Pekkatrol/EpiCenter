@@ -7,6 +7,7 @@ import Memos from './pages/Memos';
 import Login from './pages/Login';
 import { useAuth } from './context/AuthContext';
 import { loginRequest } from './auth/msalConfig';
+import { apiFetch } from './api/client';
 
 function AuthSync() {
   const { instance, accounts } = useMsal();
@@ -18,7 +19,7 @@ function AuthSync() {
     async function syncBackend() {
       if (isMsalAuthenticated && accounts.length > 0 && !token) {
         const response = await instance.acquireTokenSilent({ ...loginRequest, account: accounts[0] });
-        const res = await fetch('http://localhost:3000/api/auth/microsoft', {
+        const res = await apiFetch('/api/auth/microsoft', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ idToken: response.idToken }),
