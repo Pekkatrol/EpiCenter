@@ -6,3 +6,5 @@ export const msalConfig = {
   },
   cache: { cacheLocation: 'sessionStorage' },
 };
+
+export const loginRequest = { scopes: ['openid', 'profile', 'email'] };
