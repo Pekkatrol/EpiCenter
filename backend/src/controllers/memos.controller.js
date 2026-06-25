@@ -2,12 +2,15 @@ const prisma = require('../lib/prisma');
 
 async function getAllMemos(req, res) {
   const isAdmin = req.user?.role === 'ADMIN';
-  const memos = await prisma.memo.findMany({
-    where: isAdmin ? {} : { visibility: 'PUBLIC' },
-  });
-  res.json(memos);
+  try {
+    const memos = await prisma.memo.findMany({
+      where: isAdmin ? {} : { visibility: 'PUBLIC' },
+    });
+    res.json(memos);
+  } catch (err) {
+    res.status(500).json({ message: err.message, code: err.code });
+  }
 }
-
 async function getMemoById(req, res) {
   const { id } = req.params;
   const memo = await prisma.memo.findUnique({ where: { id } });
