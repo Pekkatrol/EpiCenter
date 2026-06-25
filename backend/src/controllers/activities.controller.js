@@ -1,8 +1,12 @@
 const prisma = require('../lib/prisma');
 
 async function getAllActivities(req, res) {
-  const activities = await prisma.activity.findMany();
-  res.json(activities);
+  try {
+    const activities = await prisma.activity.findMany();
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ message: err.message, code: err.code });
+  }
 }
 
 async function getActivityById(req, res) {
