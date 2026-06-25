@@ -6,7 +6,11 @@ const memosRoutes = require('./routes/memos.routes');
 const authRoutes = require('./routes/auth.routes');
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: ['https://epi-center-one.vercel.app', 'http://localhost:5173'],
+  credentials: true,
+}));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
@@ -16,6 +20,11 @@ app.get('/api/health', (req, res) => {
 app.use('/api/activities', activitiesRoutes);
 app.use('/api/memos', memosRoutes);
 app.use('/api/auth', authRoutes);
+
+app.use((err, req, res, next) => {
+  console.error('ERREUR:', err.message, err.stack);
+  res.status(500).json({ message: err.message });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
