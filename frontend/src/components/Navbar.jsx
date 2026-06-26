@@ -13,7 +13,8 @@ function Navbar() {
 
   return (
     <nav className="flex gap-4 p-4 bg-slate-800 text-white items-center">
-      <Link to="/">Planning</Link>
+      <Link to="/">Home</Link>
+      <Link to="/planning">Planning</Link>
       <Link to="/memos">Mémos</Link>
       {user ? (
         <div className="ml-auto flex gap-3 items-center">
