@@ -1,9 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-const activitiesRoutes = require('./routes/activities.routes');
-const memosRoutes = require('./routes/memos.routes');
-const authRoutes = require('./routes/auth.routes');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import activitiesRoutes from './routes/activities.routes';
+import memosRoutes from './routes/memos.routes';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -21,8 +23,8 @@ app.use('/api/activities', activitiesRoutes);
 app.use('/api/memos', memosRoutes);
 app.use('/api/auth', authRoutes);
 
-app.use((err, req, res, next) => {
-  console.error('ERREUR:', err.message, err.stack);
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('ERREUR:', err.message);
   res.status(500).json({ message: err.message });
 });
 

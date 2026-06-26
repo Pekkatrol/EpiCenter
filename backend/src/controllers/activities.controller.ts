@@ -1,22 +1,28 @@
-const prisma = require('../lib/prisma');
+import { Response } from 'express';
+import prisma from '../lib/prisma';
+import { AuthRequest } from '../middlewares/auth.middleware';
 
-async function getAllActivities(req, res) {
+export async function getAllActivities(req: AuthRequest, res: Response): Promise<void> {
   try {
     const activities = await prisma.activity.findMany();
     res.json(activities);
-  } catch (err) {
-    res.status(500).json({ message: err.message, code: err.code });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erreur inconnue';
+    res.status(500).json({ message });
   }
 }
 
-async function getActivityById(req, res) {
+export async function getActivityById(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params;
   const activity = await prisma.activity.findUnique({ where: { id } });
-  if (!activity) return res.status(404).json({ message: 'Activité introuvable' });
+  if (!activity) {
+    res.status(404).json({ message: 'Activité introuvable' });
+    return;
+  }
   res.json(activity);
 }
 
-async function createActivity(req, res) {
+export async function createActivity(req: AuthRequest, res: Response): Promise<void> {
   const { title, description, startDate, endDate, location, category, imageUrl, createdById } = req.body;
   const activity = await prisma.activity.create({
     data: {
@@ -33,7 +39,7 @@ async function createActivity(req, res) {
   res.status(201).json(activity);
 }
 
-async function updateActivity(req, res) {
+export async function updateActivity(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params;
   const data = { ...req.body };
   if (data.startDate) data.startDate = new Date(data.startDate);
@@ -42,10 +48,8 @@ async function updateActivity(req, res) {
   res.json(activity);
 }
 
-async function deleteActivity(req, res) {
+export async function deleteActivity(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params;
   await prisma.activity.delete({ where: { id } });
   res.status(204).send();
 }
-
-module.exports = { getAllActivities, getActivityById, createActivity, updateActivity, deleteActivity };
