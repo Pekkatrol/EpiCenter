@@ -13,7 +13,9 @@ export async function getAllActivities(req: AuthRequest, res: Response): Promise
 }
 
 export async function getActivityById(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   const activity = await prisma.activity.findUnique({ where: { id } });
   if (!activity) {
     res.status(404).json({ message: 'Activité introuvable' });
@@ -40,7 +42,9 @@ export async function createActivity(req: AuthRequest, res: Response): Promise<v
 }
 
 export async function updateActivity(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   const data = { ...req.body };
   if (data.startDate) data.startDate = new Date(data.startDate);
   if (data.endDate) data.endDate = new Date(data.endDate);
@@ -49,7 +53,9 @@ export async function updateActivity(req: AuthRequest, res: Response): Promise<v
 }
 
 export async function deleteActivity(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   await prisma.activity.delete({ where: { id } });
   res.status(204).send();
 }

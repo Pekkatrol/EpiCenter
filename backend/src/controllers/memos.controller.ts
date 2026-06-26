@@ -16,7 +16,9 @@ export async function getAllMemos(req: AuthRequest, res: Response): Promise<void
 }
 
 export async function getMemoById(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   const memo = await prisma.memo.findUnique({ where: { id } });
   if (!memo) {
     res.status(404).json({ message: 'Mémo introuvable' });
@@ -39,7 +41,9 @@ export async function createMemo(req: AuthRequest, res: Response): Promise<void>
 }
 
 export async function updateMemo(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   const data = { ...req.body };
   if (data.meetingDate) data.meetingDate = new Date(data.meetingDate);
   const memo = await prisma.memo.update({ where: { id }, data });
@@ -47,7 +51,9 @@ export async function updateMemo(req: AuthRequest, res: Response): Promise<void>
 }
 
 export async function deleteMemo(req: AuthRequest, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = Array.isArray(req.params.id)
+  ? req.params.id[0]
+  : req.params.id;
   await prisma.memo.delete({ where: { id } });
   res.status(204).send();
 }
