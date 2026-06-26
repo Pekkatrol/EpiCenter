@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useMsal, useIsAuthenticated } from '@azure/msal-react';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Planning from './pages/Planning';
 import Memos from './pages/Memos';
 import Login from './pages/Login';
@@ -43,7 +44,8 @@ function App() {
       <AuthSync />
       <Navbar />
       <Routes>
-        <Route path="/" element={<Planning />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/planning" element={<Planning />} />
         <Route path="/memos" element={<Memos />} />
         <Route path="/login" element={<Login />} />
       </Routes>
