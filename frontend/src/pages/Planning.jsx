@@ -150,7 +150,7 @@ function Planning() {
               </label>
               {form.imageUrl && (
                 <div className="relative w-fit">
-                  <img src={form.imageUrl} alt="preview" className="h-32 rounded-xl object-cover" />
+                  <img src={form.imageUrl} alt="preview" className="h-24 rounded-xl object-cover" />
                   <button type="button" onClick={() => setForm((p) => ({ ...p, imageUrl: '' }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
                 </div>
               )}
