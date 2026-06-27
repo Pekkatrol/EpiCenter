@@ -26,6 +26,8 @@ model User {
   createdAt   DateTime   @default(now())
   activities  Activity[]
   memos       Memo[]
+  polls       Poll[]
+  votes       PollVote[]
 }
 
 model Activity {
@@ -51,4 +53,36 @@ model Memo {
   createdBy   User       @relation(fields: [createdById], references: [id])
   createdById String
   createdAt   DateTime   @default(now())
+}
+
+model Poll {
+  id          String       @id @default(cuid())
+  question    String
+  closed      Boolean      @default(false)
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime     @default(now())
+  options     PollOption[]
+  votes       PollVote[]
+}
+
+model PollOption {
+  id     String     @id @default(cuid())
+  text   String
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+  votes  PollVote[]
+}
+
+model PollVote {
+  id       String     @id @default(cuid())
+  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId   String
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId String
+  user     User       @relation(fields: [userId], references: [id])
+  userId   String
+  createdAt DateTime  @default(now())
+
+  @@unique([pollId, userId])
 }
