@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
-import { Calendar, MapPin, Pencil, Trash2, Plus, Clock, Upload } from 'lucide-react';
+import { Calendar, MapPin, Pencil, Trash2, Plus, Clock, Upload, X } from 'lucide-react';
 
 const CLOUDINARY_CLOUD_NAME = 'dqugla5lk';
 const CLOUDINARY_UPLOAD_PRESET = 'epicenter';
@@ -18,6 +18,7 @@ function Planning() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', startDate: '', endDate: '', location: '', imageUrl: '' });
   const { user, token } = useAuth();
 
@@ -115,6 +116,28 @@ function Planning() {
 
   return (
     <div className="min-h-screen bg-slate-100">
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Aperçu"
+            className="max-w-[90vw] max-h-[85vh] rounded-2xl shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
           <div>
@@ -188,7 +211,9 @@ function Planning() {
                       <img
                         src={activity.imageUrl}
                         alt={activity.title}
-                        className="w-16 h-16 rounded-lg object-cover shrink-0"
+                        className="w-16 h-16 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition"
+                        onClick={() => setLightboxUrl(activity.imageUrl)}
+                        title="Cliquer pour agrandir"
                       />
                     )}
                     <div className="flex-1">
