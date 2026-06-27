@@ -150,7 +150,7 @@ function Planning() {
               </label>
               {form.imageUrl && (
                 <div className="relative w-fit">
-                  <img src={form.imageUrl} alt="preview" className="h-24 rounded-xl object-cover" />
+                  <img src={form.imageUrl} alt="preview" className="h-16 w-16 rounded-lg object-cover" />
                   <button type="button" onClick={() => setForm((p) => ({ ...p, imageUrl: '' }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
                 </div>
               )}
@@ -182,28 +182,34 @@ function Planning() {
           <div className="grid gap-4">
             {activities.map((activity) => (
               <article key={activity.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                {activity.imageUrl && (
-                  <img src={activity.imageUrl} alt={activity.title} className="w-full h-48 object-cover" />
-                )}
                 <div className="p-5 flex justify-between gap-4">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-slate-900">{activity.title}</h2>
-                    {activity.description && <p className="mt-3 text-slate-600">{activity.description}</p>}
-                    <div className="mt-4 space-y-2 text-sm text-slate-500">
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} />
-                        <span>{new Date(activity.startDate).toLocaleString('fr-FR')}</span>
-                      </div>
-                      {activity.location && (
+                  <div className="flex gap-4 flex-1">
+                    {activity.imageUrl && (
+                      <img
+                        src={activity.imageUrl}
+                        alt={activity.title}
+                        className="w-16 h-16 rounded-lg object-cover shrink-0"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h2 className="text-xl font-semibold text-slate-900">{activity.title}</h2>
+                      {activity.description && <p className="mt-1 text-slate-600">{activity.description}</p>}
+                      <div className="mt-3 space-y-1 text-sm text-slate-500">
                         <div className="flex items-center gap-2">
-                          <MapPin size={16} />
-                          <span>{activity.location}</span>
+                          <Clock size={16} />
+                          <span>{new Date(activity.startDate).toLocaleString('fr-FR')}</span>
                         </div>
-                      )}
+                        {activity.location && (
+                          <div className="flex items-center gap-2">
+                            <MapPin size={16} />
+                            <span>{activity.location}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {user?.role === 'ADMIN' && (
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                       <button onClick={() => startEdit(activity)} className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
                         <Pencil size={16} /> Modifier
                       </button>
