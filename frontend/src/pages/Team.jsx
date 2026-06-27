@@ -3,19 +3,19 @@ const members = [
     name: 'Sacha Le Moign-Avalos',
     role: 'Président',
     bio: 'Fan de D&D',
-    photo: 'https://via.placeholder.com/150',
+    photo: '/team/sacha.jpg',
   },
   {
     name: 'Aryan BHOTEY',
     role: 'Vice-Président',
     bio: 'Créateur de GCC',
-    photo: 'https://via.placeholder.com/150',
+    photo: '/team/aryan.jpg',
   },
   {
     name: '/!\\',
     role: 'Trésorier',
     bio: 'place vacante',
-    photo: 'https://via.placeholder.com/150',
+    photo: '/team/aryan.jpg',
   },
 ];
 
