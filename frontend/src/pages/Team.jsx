@@ -9,13 +9,13 @@ const members = [
     name: 'Aryan BHOTEY',
     role: 'Vice-Président',
     bio: 'Créateur de GCC',
-    photo: '/team/aryan.jpg',
+    photo: '/team/aryan.jpeg',
   },
   {
     name: '/!\\',
     role: 'Trésorier',
     bio: 'place vacante',
-    photo: '/team/aryan.jpg',
+    photo: '/team/aryan.jpeg',
   },
 ];
 
