@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Planning from './pages/Planning';
 import Memos from './pages/Memos';
 import Login from './pages/Login';
+import Team from './pages/Team';
 
 import { useAuth } from './context/AuthContext';
 import { loginRequest } from './auth/msalConfig';
@@ -53,6 +54,7 @@ function App() {
           <Route path="/planning" element={<Planning />} />
           <Route path="/memos" element={<Memos />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/team" element={<Team />} />
         </Routes>
       </div>
       <Footer />
