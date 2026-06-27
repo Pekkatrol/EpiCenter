@@ -22,7 +22,7 @@ function Navbar() {
     instance.logoutRedirect({ onRedirectNavigate: () => false });
   };
 
-  const twitchUrl = 'https://twitch.tv/TACHAIN';
+  const twitchUrl = 'https://www.twitch.tv/epitechnice';
 
   return (
     <nav className="flex gap-4 p-4 bg-slate-800 dark:bg-slate-950 text-white items-center">
