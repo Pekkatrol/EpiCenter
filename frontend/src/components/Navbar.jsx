@@ -29,6 +29,7 @@ function Navbar() {
       <Link to="/" className="font-bold text-lg">EpiCenter</Link>
       <Link to="/planning" className="hover:text-slate-300">Planning</Link>
       <Link to="/memos" className="hover:text-slate-300">Memos</Link>
+      <Link to="/polls" className="hover:text-slate-300">Sondages</Link>
 
       <div className="ml-auto flex items-center gap-3">
         <a href={twitchUrl} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition">
