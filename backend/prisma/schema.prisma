@@ -3,9 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider          = "sqlserver"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Visibility {
+  PUBLIC
+  ADMIN_ONLY
 }
 
 model User {
@@ -13,7 +22,7 @@ model User {
   email       String     @unique
   microsoftId String     @unique
   name        String
-  role        String     @default("MEMBER")
+  role        Role       @default(MEMBER)
   createdAt   DateTime   @default(now())
   activities  Activity[]
   memos       Memo[]
@@ -34,12 +43,12 @@ model Activity {
 }
 
 model Memo {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   meetingDate DateTime
   content     String
-  visibility  String   @default("ADMIN_ONLY")
-  createdBy   User     @relation(fields: [createdById], references: [id])
+  visibility  Visibility @default(ADMIN_ONLY)
+  createdBy   User       @relation(fields: [createdById], references: [id])
   createdById String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime   @default(now())
 }
