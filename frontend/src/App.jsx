@@ -1,11 +1,15 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useMsal, useIsAuthenticated } from '@azure/msal-react';
+
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
 import Home from './pages/Home';
 import Planning from './pages/Planning';
 import Memos from './pages/Memos';
 import Login from './pages/Login';
+
 import { useAuth } from './context/AuthContext';
 import { loginRequest } from './auth/msalConfig';
 import { apiFetch } from './api/client';
@@ -43,12 +47,15 @@ function App() {
     <BrowserRouter>
       <AuthSync />
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/planning" element={<Planning />} />
-        <Route path="/memos" element={<Memos />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+      <div className="pb-16">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/planning" element={<Planning />} />
+          <Route path="/memos" element={<Memos />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
+      <Footer />
     </BrowserRouter>
   );
 }
