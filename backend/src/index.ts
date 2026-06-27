@@ -6,6 +6,7 @@ dotenv.config();
 import activitiesRoutes from './routes/activities.routes';
 import memosRoutes from './routes/memos.routes';
 import authRoutes from './routes/auth.routes';
+import pollsRoutes from './routes/polls.routes';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/activities', activitiesRoutes);
 app.use('/api/memos', memosRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/polls', pollsRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('ERREUR:', err.message);
