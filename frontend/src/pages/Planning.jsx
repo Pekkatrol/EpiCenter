@@ -382,7 +382,7 @@ function Planning() {
                             <img
                               src={activity.imageUrl}
                               alt={activity.title}
-                              className="w-16 h-16 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition"
+                              className="w-24 h-24 rounded-xl object-contain bg-slate-100 dark:bg-slate-700 shrink-0 cursor-pointer hover:opacity-80 transition"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setLightboxUrl(activity.imageUrl);
