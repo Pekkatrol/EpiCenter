@@ -44,9 +44,12 @@ function CalendarView({ activities, onSelectActivity }) {
     if (!day) return [];
     return activities.filter((a) => {
       const start = new Date(a.startDate);
-      return start.getFullYear() === day.getFullYear() &&
-        start.getMonth() === day.getMonth() &&
-        start.getDate() === day.getDate();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(a.endDate);
+      end.setHours(0, 0, 0, 0);
+      const d = new Date(day);
+      d.setHours(0, 0, 0, 0);
+      return d >= start && d <= end;
     });
   };
 
@@ -195,7 +198,17 @@ function Planning() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { ...form, startDate: new Date(form.startDate).toISOString(), endDate: new Date(form.endDate).toISOString() };
+    const start = new Date(form.startDate);
+    const end = new Date(form.endDate);
+    if (end <= start) {
+      alert('La date de fin doit être après la date de début.');
+      return;
+    }
+    const payload = {
+      ...form,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
     if (editingId) {
       await apiFetch(`/api/activities/${editingId}`, {
         method: 'PUT',
