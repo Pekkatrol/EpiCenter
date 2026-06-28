@@ -7,6 +7,7 @@ import activitiesRoutes from './routes/activities.routes';
 import memosRoutes from './routes/memos.routes';
 import authRoutes from './routes/auth.routes';
 import pollsRoutes from './routes/polls.routes';
+import suggestionsRoutes from './routes/suggestions.routes';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/activities', activitiesRoutes);
 app.use('/api/memos', memosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/polls', pollsRoutes);
+app.use('/api/suggestions', suggestionsRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('ERREUR:', err.message);
