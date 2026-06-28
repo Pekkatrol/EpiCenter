@@ -80,7 +80,7 @@ function Memos() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
-        <p className="text-slate-500 dark:text-slate-400 animate-pulse">Chargement...</p>
+        <p className="text-slate-500 dark:text-slate-400 animate-pulse">Chargement des mémos...</p>
       </div>
     );
   }
