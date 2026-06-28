@@ -31,6 +31,7 @@ function Navbar() {
     { to: '/planning', label: 'Planning' },
     { to: '/memos', label: 'Memos' },
     { to: '/polls', label: 'Sondages' },
+    { to: '/suggestions', label: 'Suggestions' },
   ];
 
   const isActive = (path) => location.pathname === path;
