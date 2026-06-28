@@ -134,8 +134,14 @@ function Planning() {
   useEffect(() => { fetchActivities(); }, []);
 
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
   const filteredActivities = activities
-    .filter((a) => showPast || new Date(a.endDate) >= now)
+    .filter((a) => {
+      const end = new Date(a.endDate);
+      end.setHours(0, 0, 0, 0);
+      return showPast || end >= now;
+    })
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
