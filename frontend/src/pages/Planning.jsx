@@ -31,32 +31,63 @@ function CalendarView({ activities, onSelectActivity }) {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startPad = (firstDay.getDay() + 6) % 7;
-  const days = [];
+  const totalCells = startPad + lastDay.getDate();
+  const totalRows = Math.ceil(totalCells / 7);
 
-  for (let i = 0; i < startPad; i++) days.push(null);
-  for (let d = 1; d <= lastDay.getDate(); d++) days.push(new Date(year, month, d));
+  const COLORS = [
+    'bg-blue-500', 'bg-violet-500', 'bg-emerald-500', 'bg-rose-500',
+    'bg-amber-500', 'bg-cyan-500', 'bg-pink-500', 'bg-indigo-500',
+  ];
 
-  const getActivitiesForDay = (day) => {
-    if (!day) return [];
-    return activities.filter((a) => {
-      const start = new Date(a.startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(a.endDate);
-      end.setHours(0, 0, 0, 0);
-      const d = new Date(day);
-      d.setHours(0, 0, 0, 0);
-      return d >= start && d <= end;
-    });
+  const activityColors = {};
+  activities.forEach((a, i) => {
+    activityColors[a.id] = COLORS[i % COLORS.length];
+  });
+
+  const isToday = (col, row) => {
+    const cellIndex = row * 7 + col - startPad + 1;
+    if (cellIndex < 1 || cellIndex > lastDay.getDate()) return false;
+    const t = new Date();
+    return cellIndex === t.getDate() && month === t.getMonth() && year === t.getFullYear();
   };
 
-  const isToday = (day) => {
-    if (!day) return false;
-    const t = new Date();
-    return day.getDate() === t.getDate() && day.getMonth() === t.getMonth() && day.getFullYear() === t.getFullYear();
+  const getDayNumber = (col, row) => {
+    const n = row * 7 + col - startPad + 1;
+    return n >= 1 && n <= lastDay.getDate() ? n : null;
+  };
+
+  const getActivitiesForRow = (row) => {
+    const rowStart = new Date(year, month, row * 7 - startPad + 1);
+    const rowEnd = new Date(year, month, row * 7 - startPad + 7);
+    rowEnd.setHours(23, 59, 59, 999);
+
+    return activities.filter((a) => {
+      const start = new Date(a.startDate);
+      const end = new Date(a.endDate);
+      return start <= rowEnd && end >= rowStart;
+    }).map((a) => {
+      const aStart = new Date(a.startDate);
+      aStart.setHours(0, 0, 0, 0);
+      const aEnd = new Date(a.endDate);
+      aEnd.setHours(0, 0, 0, 0);
+
+      const rowDay0 = new Date(year, month, row * 7 - startPad + 1);
+      rowDay0.setHours(0, 0, 0, 0);
+      const rowDay6 = new Date(year, month, row * 7 - startPad + 7);
+      rowDay6.setHours(0, 0, 0, 0);
+
+      const clampedStart = aStart < rowDay0 ? rowDay0 : aStart;
+      const clampedEnd = aEnd > rowDay6 ? rowDay6 : aEnd;
+
+      const colStart = (clampedStart - rowDay0) / (1000 * 60 * 60 * 24);
+      const colEnd = (clampedEnd - rowDay0) / (1000 * 60 * 60 * 24);
+      const span = colEnd - colStart + 1;
+
+      return { ...a, colStart, span };
+    });
   };
 
   return (
@@ -73,44 +104,59 @@ function CalendarView({ activities, onSelectActivity }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-7 mb-2">
+      {/* Jours de la semaine */}
+      <div className="grid grid-cols-7 mb-1">
         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
           <div key={d} className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 py-1">{d}</div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((day, i) => {
-          const dayActivities = getActivitiesForDay(day);
+      {/* Grille par lignes */}
+      <div className="flex flex-col gap-1">
+        {Array.from({ length: totalRows }).map((_, row) => {
+          const rowActivities = getActivitiesForRow(row);
           return (
-            <div
-              key={i}
-              className={`min-h-[72px] rounded-xl p-1 ${
-                day ? 'bg-slate-50 dark:bg-slate-700/50' : ''
-              } ${isToday(day) ? 'ring-2 ring-blue-500' : ''}`}
-            >
-              {day && (
-                <>
-                  <p className={`text-xs font-medium text-center mb-1 ${
-                    isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {day.getDate()}
-                  </p>
-                  <div className="space-y-0.5">
-                        {dayActivities.map((a) => (
-                          <button
-                            key={a.id}
-                            type="button"
-                            onClick={() => onSelectActivity(a)}
-                            className="w-full text-left text-xs bg-blue-500 text-white rounded px-1 py-0.5 truncate cursor-pointer hover:bg-blue-600 transition"
-                            title={a.title}
-                          >
-                            {a.title}
-                          </button>
-                        ))}
+            <div key={row} className="relative grid grid-cols-7 gap-1" style={{ minHeight: '64px' }}>
+              {/* Cases de jours */}
+              {Array.from({ length: 7 }).map((_, col) => {
+                const dayNum = getDayNumber(col, row);
+                const today = isToday(col, row);
+                return (
+                  <div
+                    key={col}
+                    className={`rounded-xl pt-1 pb-8 ${dayNum ? 'bg-slate-50 dark:bg-slate-700/50' : ''} ${today ? 'ring-2 ring-blue-500' : ''}`}
+                  >
+                    {dayNum && (
+                      <p className={`text-xs font-medium text-center ${today ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                        {dayNum}
+                      </p>
+                    )}
                   </div>
-                </>
-              )}
+                );
+              })}
+
+              {/* Blocs d'activités superposés */}
+              <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none" style={{ top: '22px' }}>
+                {rowActivities.map((a, idx) => (
+                  <div
+                    key={a.id}
+                    className="contents"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelectActivity(a)}
+                      title={a.title}
+                      style={{
+                        gridColumn: `${a.colStart + 1} / span ${a.span}`,
+                        marginTop: `${idx * 22}px`,
+                      }}
+                      className={`pointer-events-auto text-xs text-white rounded-md px-2 py-0.5 truncate text-left hover:opacity-80 transition ${activityColors[a.id]}`}
+                    >
+                      {a.title}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           );
         })}
