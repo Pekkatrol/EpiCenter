@@ -25,12 +25,12 @@ function getRelativeLabel(dateStr) {
   return { label: new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }), color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' };
 }
 
-function CalendarView({ activities, onEdit, onDelete, onLightbox, user, now }) {
+function CalendarView({ activities, onEdit, onDelete, onLightbox, user }) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startPad = (firstDay.getDay() + 6) % 7;
@@ -56,60 +56,124 @@ function CalendarView({ activities, onEdit, onDelete, onLightbox, user, now }) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
-          <ChevronLeft size={20} className="text-slate-600 dark:text-slate-300" />
-        </button>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
-          {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-        </h2>
-        <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
-          <ChevronRight size={20} className="text-slate-600 dark:text-slate-300" />
-        </button>
-      </div>
+    <>
+      {selectedActivity && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setSelectedActivity(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{selectedActivity.title}</h2>
+              <button onClick={() => setSelectedActivity(null)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
 
-      <div className="grid grid-cols-7 mb-2">
-        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 py-1">{d}</div>
-        ))}
-      </div>
+            {selectedActivity.imageUrl && (
+              <img
+                src={selectedActivity.imageUrl}
+                alt={selectedActivity.title}
+                className="w-full h-48 object-cover rounded-xl cursor-pointer hover:opacity-90 transition"
+                onClick={() => { onLightbox(selectedActivity.imageUrl); setSelectedActivity(null); }}
+                title="Cliquer pour agrandir"
+              />
+            )}
 
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((day, i) => {
-          const dayActivities = getActivitiesForDay(day);
-          return (
-            <div
-              key={i}
-              className={`min-h-[72px] rounded-xl p-1 ${
-                day ? 'bg-slate-50 dark:bg-slate-700/50' : ''
-              } ${isToday(day) ? 'ring-2 ring-blue-500' : ''}`}
-            >
-              {day && (
-                <>
-                  <p className={`text-xs font-medium text-center mb-1 ${
-                    isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'
-                  }`}>
-                    {day.getDate()}
-                  </p>
-                  <div className="space-y-0.5">
-                    {dayActivities.map((a) => (
-                      <div
-                        key={a.id}
-                        className="text-xs bg-blue-500 text-white rounded px-1 py-0.5 truncate cursor-pointer hover:bg-blue-600 transition"
-                        title={a.title}
-                      >
-                        {a.title}
-                      </div>
-                    ))}
-                  </div>
-                </>
+            {selectedActivity.description && (
+              <p className="text-slate-600 dark:text-slate-400">{selectedActivity.description}</p>
+            )}
+
+            <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <Clock size={15} />
+                <span>
+                  {new Date(selectedActivity.startDate).toLocaleString('fr-FR')} → {new Date(selectedActivity.endDate).toLocaleString('fr-FR')}
+                </span>
+              </div>
+              {selectedActivity.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin size={15} />
+                  <span>{selectedActivity.location}</span>
+                </div>
               )}
             </div>
-          );
-        })}
+
+            {user?.role === 'ADMIN' && (
+              <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => { onEdit(selectedActivity); setSelectedActivity(null); }}
+                  className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition text-sm"
+                >
+                  <Pencil size={14} /> Modifier
+                </button>
+                <button
+                  onClick={() => { onDelete(selectedActivity.id); setSelectedActivity(null); }}
+                  className="flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 transition text-sm"
+                >
+                  <Trash2 size={14} /> Supprimer
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
+            <ChevronLeft size={20} className="text-slate-600 dark:text-slate-300" />
+          </button>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
+            {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+          </h2>
+          <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
+            <ChevronRight size={20} className="text-slate-600 dark:text-slate-300" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 mb-2">
+          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
+            <div key={d} className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 py-1">{d}</div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day, i) => {
+            const dayActivities = getActivitiesForDay(day);
+            return (
+              <div
+                key={i}
+                className={`min-h-[72px] rounded-xl p-1 ${day ? 'bg-slate-50 dark:bg-slate-700/50' : ''} ${isToday(day) ? 'ring-2 ring-blue-500' : ''}`}
+              >
+                {day && (
+                  <>
+                    <p className={`text-xs font-medium text-center mb-1 ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                      {day.getDate()}
+                    </p>
+                    <div className="space-y-0.5">
+                      {dayActivities.map((a) => (
+                        <div
+                          key={a.id}
+                          onClick={() => setSelectedActivity(a)}
+                          className="text-xs bg-blue-500 text-white rounded px-1 py-0.5 truncate cursor-pointer hover:bg-blue-600 transition"
+                          title={a.title}
+                        >
+                          {a.title}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -235,7 +299,6 @@ function Planning() {
             </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Toggle vue liste / calendrier */}
             <div className="flex bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1">
               <button
                 onClick={() => setView('list')}
@@ -320,7 +383,6 @@ function Planning() {
           </form>
         )}
 
-        {/* VUE CALENDRIER */}
         {view === 'calendar' && (
           <CalendarView
             activities={activities}
@@ -328,11 +390,9 @@ function Planning() {
             onDelete={handleDelete}
             onLightbox={setLightboxUrl}
             user={user}
-            now={now}
           />
         )}
 
-        {/* VUE LISTE */}
         {view === 'list' && (
           <>
             {filteredActivities.length === 0 ? (
