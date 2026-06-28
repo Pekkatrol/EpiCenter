@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useMsal } from '@azure/msal-react';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, LogOut, User } from 'lucide-react';
+import { Sun, Moon, LogOut, User, Menu, X } from 'lucide-react';
 
 function TwitchIcon() {
   return (
@@ -17,6 +18,7 @@ function Navbar() {
   const { instance } = useMsal();
   const { dark, toggle } = useTheme();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -32,34 +34,37 @@ function Navbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
-  const activeClass = 'bg-slate-700 text-white';
-  const inactiveClass = 'text-slate-400 hover:bg-slate-800 hover:text-white';
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-slate-700 bg-slate-900 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3">
 
-        <Link to="/" className="mr-4 flex items-center gap-2 text-white">
+        <Link to="/" className="mr-4 flex items-center gap-2 text-white" onClick={closeMenu}>
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold">
             E
           </div>
-          <span className="hidden font-bold sm:block">EpiCenter</span>
+          <span className="font-bold">EpiCenter</span>
         </Link>
 
-        <div className="flex items-center gap-1">
+        {/* Nav links desktop */}
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${isActive(to) ? activeClass : inactiveClass}`}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                isActive(to) ? 'bg-slate-700 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
             >
               {label}
             </Link>
           ))}
         </div>
 
+        {/* Actions desktop */}
         <div className="ml-auto flex items-center gap-2">
-
           <a
             href={twitchUrl}
             target="_blank"
@@ -77,15 +82,16 @@ function Navbar() {
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          <div className="mx-1 h-5 w-px bg-slate-700" />
+          <div className="hidden md:block mx-1 h-5 w-px bg-slate-700" />
 
+          {/* User desktop */}
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1.5">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
                   {user.name ? user.name[0].toUpperCase() : '?'}
                 </div>
-                <span className="hidden text-xs font-medium text-slate-300 sm:block">
+                <span className="text-xs font-medium text-slate-300">
                   {user.name}
                 </span>
                 {user.role === 'ADMIN' && (
@@ -105,14 +111,74 @@ function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+              className="hidden md:flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500"
             >
               <User size={14} />
               Connexion
             </Link>
           )}
+
+          {/* Hamburger mobile */}
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
+
+      {/* Menu mobile déroulant */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-slate-700 bg-slate-900 px-4 pb-4 pt-2 flex flex-col gap-1">
+          {navLinks.map(({ to, label }) => (
+            <Link
+              key={to}
+              to={to}
+              onClick={closeMenu}
+              className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                isActive(to) ? 'bg-slate-700 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+
+          <div className="my-2 h-px bg-slate-700" />
+
+          {user ? (
+            <>
+              <div className="flex items-center gap-3 rounded-lg bg-slate-800 px-3 py-2.5">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                  {user.name ? user.name[0].toUpperCase() : '?'}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">{user.name}</p>
+                  {user.role === 'ADMIN' && (
+                    <p className="text-xs text-indigo-400">Administrateur</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => { handleLogout(); closeMenu(); }}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-900 transition"
+              >
+                <LogOut size={15} />
+                Deconnexion
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              onClick={closeMenu}
+              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+            >
+              <User size={15} />
+              Connexion
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
