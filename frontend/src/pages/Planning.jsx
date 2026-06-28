@@ -34,8 +34,8 @@ function CalendarView({ activities, onSelectActivity }) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startPad = (firstDay.getDay() + 6) % 7;
-  const totalCells = startPad + lastDay.getDate();
-  const totalRows = Math.ceil(totalCells / 7);
+  const totalDays = lastDay.getDate();
+  const totalRows = Math.ceil((startPad + totalDays) / 7);
 
   const COLORS = [
     'bg-blue-500', 'bg-violet-500', 'bg-emerald-500', 'bg-rose-500',
@@ -47,47 +47,43 @@ function CalendarView({ activities, onSelectActivity }) {
     activityColors[a.id] = COLORS[i % COLORS.length];
   });
 
-  const isToday = (col, row) => {
-    const cellIndex = row * 7 + col - startPad + 1;
-    if (cellIndex < 1 || cellIndex > lastDay.getDate()) return false;
+  const isToday = (dayNum) => {
     const t = new Date();
-    return cellIndex === t.getDate() && month === t.getMonth() && year === t.getFullYear();
+    return dayNum === t.getDate() && month === t.getMonth() && year === t.getFullYear();
   };
 
-  const getDayNumber = (col, row) => {
-    const n = row * 7 + col - startPad + 1;
-    return n >= 1 && n <= lastDay.getDate() ? n : null;
-  };
+  const getRowActivities = (row) => {
+    const rowFirstDay = row * 7 - startPad;
+    const rowLastDay = rowFirstDay + 6;
 
-  const getActivitiesForRow = (row) => {
-    const rowStart = new Date(year, month, row * 7 - startPad + 1);
-    const rowEnd = new Date(year, month, row * 7 - startPad + 7);
-    rowEnd.setHours(23, 59, 59, 999);
+    return activities
+      .filter((a) => {
+        const aStart = new Date(a.startDate);
+        const aEnd = new Date(a.endDate);
+        const aStartDay = aStart.getFullYear() === year && aStart.getMonth() === month
+          ? aStart.getDate() - 1
+          : (aStart < new Date(year, month, 1) ? -999 : 999);
+        const aEndDay = aEnd.getFullYear() === year && aEnd.getMonth() === month
+          ? aEnd.getDate() - 1
+          : (aEnd > new Date(year, month + 1, 0) ? 999 : -999);
+        return aStartDay <= rowLastDay && aEndDay >= rowFirstDay;
+      })
+      .map((a) => {
+        const aStart = new Date(a.startDate);
+        const aEnd = new Date(a.endDate);
 
-    return activities.filter((a) => {
-      const start = new Date(a.startDate);
-      const end = new Date(a.endDate);
-      return start <= rowEnd && end >= rowStart;
-    }).map((a) => {
-      const aStart = new Date(a.startDate);
-      aStart.setHours(0, 0, 0, 0);
-      const aEnd = new Date(a.endDate);
-      aEnd.setHours(0, 0, 0, 0);
+        let startCol = aStart.getFullYear() === year && aStart.getMonth() === month
+          ? aStart.getDate() - 1 - rowFirstDay
+          : 0;
+        let endCol = aEnd.getFullYear() === year && aEnd.getMonth() === month
+          ? aEnd.getDate() - 1 - rowFirstDay
+          : 6;
 
-      const rowDay0 = new Date(year, month, row * 7 - startPad + 1);
-      rowDay0.setHours(0, 0, 0, 0);
-      const rowDay6 = new Date(year, month, row * 7 - startPad + 7);
-      rowDay6.setHours(0, 0, 0, 0);
+        startCol = Math.max(0, Math.min(6, startCol));
+        endCol = Math.max(0, Math.min(6, endCol));
 
-      const clampedStart = aStart < rowDay0 ? rowDay0 : aStart;
-      const clampedEnd = aEnd > rowDay6 ? rowDay6 : aEnd;
-
-      const colStart = (clampedStart - rowDay0) / (1000 * 60 * 60 * 24);
-      const colEnd = (clampedEnd - rowDay0) / (1000 * 60 * 60 * 24);
-      const span = colEnd - colStart + 1;
-
-      return { ...a, colStart, span };
-    });
+        return { ...a, startCol, endCol };
+      });
   };
 
   return (
@@ -104,59 +100,62 @@ function CalendarView({ activities, onSelectActivity }) {
         </button>
       </div>
 
-      {/* Jours de la semaine */}
       <div className="grid grid-cols-7 mb-1">
         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
           <div key={d} className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 py-1">{d}</div>
         ))}
       </div>
 
-      {/* Grille par lignes */}
       <div className="flex flex-col gap-1">
         {Array.from({ length: totalRows }).map((_, row) => {
-          const rowActivities = getActivitiesForRow(row);
+          const rowActivities = getRowActivities(row);
+          const ROW_HEIGHT = 80;
+          const HEADER_HEIGHT = 20;
+          const BLOCK_HEIGHT = 18;
+          const BLOCK_GAP = 2;
+
           return (
-            <div key={row} className="relative grid grid-cols-7 gap-1" style={{ minHeight: '64px' }}>
-              {/* Cases de jours */}
-              {Array.from({ length: 7 }).map((_, col) => {
-                const dayNum = getDayNumber(col, row);
-                const today = isToday(col, row);
+            <div key={row} className="relative" style={{ height: `${ROW_HEIGHT}px` }}>
+              {/* Grille de fond */}
+              <div className="absolute inset-0 grid grid-cols-7 gap-1">
+                {Array.from({ length: 7 }).map((_, col) => {
+                  const dayNum = row * 7 + col - startPad + 1;
+                  const valid = dayNum >= 1 && dayNum <= totalDays;
+                  const today = valid && isToday(dayNum);
+                  return (
+                    <div
+                      key={col}
+                      className={`rounded-xl h-full ${valid ? 'bg-slate-50 dark:bg-slate-700/50' : ''} ${today ? 'ring-2 ring-blue-500' : ''}`}
+                    >
+                      {valid && (
+                        <p className={`text-xs font-medium text-center pt-1 ${today ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                          {dayNum}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Blocs d'activités */}
+              {rowActivities.map((a, idx) => {
+                const left = `calc(${(a.startCol / 7) * 100}% + ${a.startCol * 4 + 2}px)`;
+                const width = `calc(${((a.endCol - a.startCol + 1) / 7) * 100}% - ${a.startCol * 4 + 6}px)`;
+                const top = HEADER_HEIGHT + idx * (BLOCK_HEIGHT + BLOCK_GAP);
+
                 return (
-                  <div
-                    key={col}
-                    className={`rounded-xl pt-1 pb-8 ${dayNum ? 'bg-slate-50 dark:bg-slate-700/50' : ''} ${today ? 'ring-2 ring-blue-500' : ''}`}
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => onSelectActivity(a)}
+                    title={a.title}
+                    style={{ left, width, top, height: `${BLOCK_HEIGHT}px` }}
+                    className={`absolute text-xs text-white rounded-md px-2 truncate text-left hover:opacity-80 transition z-10 ${activityColors[a.id]}`}
                   >
-                    {dayNum && (
-                      <p className={`text-xs font-medium text-center ${today ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                        {dayNum}
-                      </p>
-                    )}
-                  </div>
+                    {a.title}
+                  </button>
                 );
               })}
-
-              {/* Blocs d'activités superposés */}
-              <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none" style={{ top: '22px' }}>
-                {rowActivities.map((a, idx) => (
-                  <div
-                    key={a.id}
-                    className="contents"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onSelectActivity(a)}
-                      title={a.title}
-                      style={{
-                        gridColumn: `${a.colStart + 1} / span ${a.span}`,
-                        marginTop: `${idx * 22}px`,
-                      }}
-                      className={`pointer-events-auto text-xs text-white rounded-md px-2 py-0.5 truncate text-left hover:opacity-80 transition ${activityColors[a.id]}`}
-                    >
-                      {a.title}
-                    </button>
-                  </div>
-                ))}
-              </div>
             </div>
           );
         })}
