@@ -115,7 +115,11 @@ function CalendarView({ activities, onSelectActivity }) {
           const BLOCK_GAP = 2;
 
           return (
-            <div key={row} className="relative" style={{ height: `${ROW_HEIGHT}px` }}>
+            <div
+              key={row}
+              className="relative overflow-hidden"
+              style={{ height: `${ROW_HEIGHT}px` }}
+            >
               {/* Grille de fond */}
               <div className="absolute inset-0 grid grid-cols-7 gap-1">
                 {Array.from({ length: 7 }).map((_, col) => {
