@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../api/client';
 import { Calendar, MapPin, Pencil, Trash2, Plus, Clock, Upload, X, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import Drawer from '../components/drawer';
 
 const CLOUDINARY_CLOUD_NAME = 'dqugla5lk';
 const CLOUDINARY_UPLOAD_PRESET = 'epicenter';
@@ -25,7 +26,7 @@ function getRelativeLabel(dateStr) {
   return { label: new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }), color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' };
 }
 
-function CalendarView({ activities, onEdit, onDelete, onLightbox, user, now }) {
+function CalendarView({ activities, onSelectActivity }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const year = currentDate.getFullYear();
@@ -93,15 +94,17 @@ function CalendarView({ activities, onEdit, onDelete, onLightbox, user, now }) {
                     {day.getDate()}
                   </p>
                   <div className="space-y-0.5">
-                    {dayActivities.map((a) => (
-                      <div
-                        key={a.id}
-                        className="text-xs bg-blue-500 text-white rounded px-1 py-0.5 truncate cursor-pointer hover:bg-blue-600 transition"
-                        title={a.title}
-                      >
-                        {a.title}
-                      </div>
-                    ))}
+                        {dayActivities.map((a) => (
+                          <button
+                            key={a.id}
+                            type="button"
+                            onClick={() => onSelectActivity(a)}
+                            className="w-full text-left text-xs bg-blue-500 text-white rounded px-1 py-0.5 truncate cursor-pointer hover:bg-blue-600 transition"
+                            title={a.title}
+                          >
+                            {a.title}
+                          </button>
+                        ))}
                   </div>
                 </>
               )}
@@ -122,6 +125,7 @@ function Planning() {
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', startDate: '', endDate: '', location: '', imageUrl: '' });
   const { user, token } = useAuth();
 
@@ -163,6 +167,14 @@ function Planning() {
     setForm({ title: '', description: '', startDate: '', endDate: '', location: '', imageUrl: '' });
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const openDrawer = (activity) => {
+    setSelectedActivity(activity);
+  };
+
+  const closeDrawer = () => {
+    setSelectedActivity(null);
   };
 
   const startCreate = () => { resetForm(); setShowForm(true); };
@@ -324,11 +336,7 @@ function Planning() {
         {view === 'calendar' && (
           <CalendarView
             activities={activities}
-            onEdit={startEdit}
-            onDelete={handleDelete}
-            onLightbox={setLightboxUrl}
-            user={user}
-            now={now}
+            onSelectActivity={openDrawer}
           />
         )}
 
@@ -348,7 +356,13 @@ function Planning() {
                   const isPast = new Date(activity.endDate) < now;
                   const { label, color } = getRelativeLabel(activity.startDate);
                   return (
-                    <article key={activity.id} className={`bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition ${isPast ? 'opacity-60' : ''}`}>
+                    <article
+                      key={activity.id}
+                      onClick={() => openDrawer(activity)}
+                      role="button"
+                      tabIndex={0}
+                      className={`bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer ${isPast ? 'opacity-60' : ''}`}
+                    >
                       <div className="p-5 flex justify-between gap-4">
                         <div className="flex gap-4 flex-1">
                           {activity.imageUrl && (
@@ -356,7 +370,10 @@ function Planning() {
                               src={activity.imageUrl}
                               alt={activity.title}
                               className="w-16 h-16 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition"
-                              onClick={() => setLightboxUrl(activity.imageUrl)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxUrl(activity.imageUrl);
+                              }}
                               title="Cliquer pour agrandir"
                             />
                           )}
@@ -384,10 +401,22 @@ function Planning() {
                         </div>
                         {user?.role === 'ADMIN' && (
                           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                            <button onClick={() => startEdit(activity)} className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEdit(activity);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition"
+                            >
                               <Pencil size={16} /> Modifier
                             </button>
-                            <button onClick={() => handleDelete(activity.id)} className="flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 transition">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(activity.id);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 transition"
+                            >
                               <Trash2 size={16} /> Supprimer
                             </button>
                           </div>
@@ -400,6 +429,14 @@ function Planning() {
             )}
           </>
         )}
+
+        <Drawer
+          open={Boolean(selectedActivity)}
+          activity={selectedActivity}
+          onClose={closeDrawer}
+          onEdit={user?.role === 'ADMIN' ? startEdit : undefined}
+          onDelete={user?.role === 'ADMIN' ? handleDelete : undefined}
+        />
       </div>
     </div>
   );
