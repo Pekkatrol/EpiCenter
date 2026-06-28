@@ -11,6 +11,8 @@ import Memos from './pages/Memos';
 import Login from './pages/Login';
 import Team from './pages/Team';
 import Polls from './pages/Polls';
+import Suggestions from './pages/Suggestions';
+
 
 import { useAuth } from './context/AuthContext';
 import { loginRequest } from './auth/msalConfig';
@@ -57,6 +59,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/team" element={<Team />} />
           <Route path="/polls" element={<Polls />} />
+          <Route path="/suggestions" element={<Suggestions />} />
         </Routes>
       </div>
       <Footer />
