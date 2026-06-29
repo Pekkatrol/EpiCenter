@@ -6,7 +6,7 @@ function Footer() {
       <span>© 2026 EpiCenter — BDE Epitech</span>
       <div className="flex gap-4">
         <Link to="/team" className="underline hover:text-slate-300">Qui sommes-nous ?</Link>
-        <a href="mailto:bde@epitech.eu" className="underline hover:text-slate-300">Contact</a>
+        <a href="mailto:bde.nice@epitech.eu" className="underline hover:text-slate-300">Contact</a>
       </div>
     </footer>
   );
