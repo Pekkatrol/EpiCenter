@@ -30,6 +30,16 @@ function Home() {
             <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Comptes-rendus</h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-2">Historique des réunions et décisions</p>
           </a>
+          <a href="/polls" className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition">
+            <FileText className="text-slate-700 dark:text-slate-300 mb-3" />
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Sondages</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-2">Participez à des sondages et votez</p>
+          </a>
+          <a href="/suggestions" className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition">
+            <FileText className="text-slate-700 dark:text-slate-300 mb-3" />
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Suggestions</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-2">Donnez nous vos retour</p>
+          </a>
           {!user ? (
             <a href="/login" className="bg-slate-900 dark:bg-slate-700 text-white rounded-2xl shadow-md p-6 hover:bg-slate-800 dark:hover:bg-slate-600 transition">
               <LogIn className="mb-3" />
