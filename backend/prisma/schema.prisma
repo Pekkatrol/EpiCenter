@@ -30,6 +30,7 @@ model User {
   votes           PollVote[]
   suggestions     Suggestion[]
   suggestionLikes SuggestionLike[]
+  banners Banner[]
 }
 
 model Activity {
@@ -109,4 +110,15 @@ model SuggestionLike {
   createdAt    DateTime   @default(now())
 
   @@unique([suggestionId, userId])
+}
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  link        String?
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime @default(now())
 }
