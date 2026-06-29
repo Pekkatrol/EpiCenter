@@ -118,6 +118,7 @@ model Banner {
   description String?
   imageUrl    String?
   link        String?
+  position    String   @default("TOP")
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdById String
   createdAt   DateTime @default(now())
