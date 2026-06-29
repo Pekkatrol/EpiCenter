@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useMsal } from '@azure/msal-react';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, LogOut, User, Menu, X } from 'lucide-react';
+import { Sun, Moon, LogOut, User, Menu, X, Github } from 'lucide-react';
 
 function TwitchIcon() {
   return (
@@ -26,6 +26,7 @@ function Navbar() {
   };
 
   const twitchUrl = 'https://www.twitch.tv/epitechnice';
+  const githubUrl = 'https://github.com/Pekkatrol/EpiCenter';
 
   const navLinks = [
     { to: '/planning', label: 'Planning' },
@@ -35,7 +36,6 @@ function Navbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
-
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -49,7 +49,6 @@ function Navbar() {
           <span className="font-bold">EpiCenter</span>
         </Link>
 
-        {/* Nav links desktop */}
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map(({ to, label }) => (
             <Link
@@ -64,8 +63,8 @@ function Navbar() {
           ))}
         </div>
 
-        {/* Actions desktop */}
         <div className="ml-auto flex items-center gap-2">
+
           <a
             href={twitchUrl}
             target="_blank"
@@ -74,6 +73,16 @@ function Navbar() {
             title="Notre Twitch"
           >
             <TwitchIcon />
+          </a>
+
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            title="GitHub"
+          >
+            <Github size={16} />
           </a>
 
           <button
@@ -85,7 +94,6 @@ function Navbar() {
 
           <div className="hidden md:block mx-1 h-5 w-px bg-slate-700" />
 
-          {/* User desktop */}
           {user ? (
             <div className="hidden md:flex items-center gap-2">
               <div className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1.5">
@@ -119,7 +127,6 @@ function Navbar() {
             </Link>
           )}
 
-          {/* Hamburger mobile */}
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
@@ -129,7 +136,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Menu mobile déroulant */}
       {menuOpen && (
         <div className="md:hidden border-t border-slate-700 bg-slate-900 px-4 pb-4 pt-2 flex flex-col gap-1">
           {navLinks.map(({ to, label }) => (
@@ -144,6 +150,30 @@ function Navbar() {
               {label}
             </Link>
           ))}
+
+          <div className="my-2 h-px bg-slate-700" />
+
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={closeMenu}
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            <Github size={15} />
+            GitHub
+          </a>
+
+          <a
+            href={twitchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={closeMenu}
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-purple-400 hover:bg-slate-800 hover:text-purple-300 transition"
+          >
+            <TwitchIcon />
+            Twitch
+          </a>
 
           <div className="my-2 h-px bg-slate-700" />
 
