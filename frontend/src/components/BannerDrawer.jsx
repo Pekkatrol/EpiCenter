@@ -9,7 +9,7 @@ export default function BannerDrawer({ open, banner, onClose, onEdit, onDelete }
     <div className="fixed inset-0 z-50">
       <button
         type="button"
-        aria-label="Fermer le panneau de détails"
+        aria-label="Fermer le panneau de details"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -36,11 +36,13 @@ export default function BannerDrawer({ open, banner, onClose, onEdit, onDelete }
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {banner.imageUrl && (
-            <img
-              src={banner.imageUrl}
-              alt={banner.title}
-              className="mb-6 w-full rounded-3xl object-cover max-h-96"
-            />
+            <div className="mb-6 w-full rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <img
+                src={banner.imageUrl}
+                alt={banner.title}
+                className="w-full h-auto object-contain max-h-[70vh] mx-auto"
+              />
+            </div>
           )}
 
           {banner.description && (
